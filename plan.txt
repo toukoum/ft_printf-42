@@ -1,0 +1,109 @@
+    Lecture et Affichage Direct:
+        Parcourir la chaîne de format caractère par caractère.
+        Afficher directement les caractères jusqu'à rencontrer un %.
+
+    Détection et Traitement du Spécificateur de Format:
+        Lorsque % est rencontré, commencer l'analyse (parsing) des caractères suivants pour identifier les flags, la largeur, la précision et le type de conversion.
+        Remplir une structure avec ces informations. Par exemple, tu pourrais avoir une structure t_format qui contient des champs comme width, precision, flag_minus, flag_zero, etc.
+
+    Appel des Fonctions de Conversion:
+        En fonction du type de conversion détecté (s pour les chaînes, d pour les nombres décimaux, etc.), appeler la fonction appropriée.
+        Cette fonction va utiliser les informations de la structure pour formater l'argument en conséquence.
+        Par exemple, pour %s, ta fonction va devoir gérer la précision (combien de caractères de la chaîne afficher) et la largeur (combien d'espaces ajouter et où).
+
+    Mise en Forme et Conversion:
+        Chaque fonction de conversion va préparer la sortie selon les spécifications et renvoyer la chaîne de caractères formatée.
+        Si nécessaire, ajouter les espaces ou les zéros pour la largeur, tronquer la chaîne pour la précision, etc.
+
+    Affichage Final:
+        La chaîne formatée est ensuite affichée à l'endroit où le spécificateur de format a été trouvé dans la chaîne originale.
+
+    Répétition:
+        Continuer à lire et à afficher le reste de la chaîne après le spécificateur de format.
+        Répéter le processus pour chaque spécificateur de format rencontré jusqu'à la fin de la chaîne.
+
+Ton architecture de code doit donc être bien organisée pour séparer les responsabilités : une partie pour parser, une autre pour gérer la mise en forme et une dernière pour l'affichage. L'utilisation d'une structure est une très bonne approche pour garder les informations organisées et facilement accessibles à travers les différentes étapes de la conversion.
+
+Prends ton temps pour bien concevoir chaque fonction, et n'oublie pas les tests unitaires pour t'assurer que chaque partie fait bien ce qu'elle doit faire. C'est comme ça que tu vas construire un ft_printf() solide et fiable. Bon courage, et n'hésite pas si tu as d'autres questions ! 👨‍💻🛠️
+
+
+
+
+PRIORITE
+
+    Flags '-' et '0':
+        Si les deux sont présents, '-' a la priorité et le flag '0' est ignoré. L'alignement à gauche est donc effectué et le remplissage avec des zéros n'est pas fait.
+        Exemple : %0-5d et %-05d donneront le même résultat car le '-' l'emporte.
+
+    Flags ' ' et '+':
+        Le flag '+' a la priorité sur ' '. Si les deux sont présents, seul le '+' est pris en compte pour forcer l'affichage du signe.
+        Exemple : % +d et %+ d traiteront l'espace comme s'il n'était pas là.
+
+    Flag '.' pour la Précision:
+        La précision vient toujours après la largeur (si spécifiée) et est introduite par un point.
+        Elle affecte le nombre de chiffres après la virgule pour les flottants, le nombre de chiffres affichés pour les entiers, et le nombre maximal de caractères pour les chaînes.
+        L'ordre de la précision par rapport aux autres flags n'est pas important, mais elle doit venir après la largeur si celle-ci est spécifiée.
+
+    Flag '#':
+        Pour les conversions %o, %x, %X, le flag '#' peut être placé n'importe où après le % et avant le spécificateur de type. Il a le même effet peu importe sa position.
+
+
+
+
+APPLICATION DES FLAGS
+
+    %c - Caractère:
+        '-' : Aligner à gauche le caractère dans le champ spécifié.
+        '0' : Généralement non applicable pour les caractères.
+        '.' : Non applicable.
+        '#' : Non applicable.
+        ' ' : Non applicable.
+        '+' : Non applicable.
+
+    %s - Chaîne de caractères:
+        '-' : Aligner à gauche la chaîne dans le champ spécifié.
+        '0' : Non applicable.
+        '.' : Tronquer la chaîne à la longueur spécifiée par la précision.
+        '#' : Non applicable.
+        ' ' : Non applicable.
+        '+' : Non applicable.
+
+    %p - Pointeur (adresse mémoire):
+        '-' : Aligner à gauche l'adresse dans le champ spécifié.
+        '0' : Non applicable, l'adresse est toujours précédée de 0x.
+        '.' : La précision peut déterminer le nombre de chiffres de l'adresse à afficher.
+        '#' : Non applicable, 0x est toujours inclus.
+        ' ' : Non applicable.
+        '+' : Non applicable.
+
+    %d / %i - Entier signé:
+        '-' : Aligner à gauche le nombre dans le champ spécifié.
+        '0' : Remplir avec des zéros si aucune précision n'est donnée.
+        '.' : Fixe la précision du nombre, écrasant le flag '0'.
+        '#' : Non applicable.
+        ' ' : Ajouter un espace si le nombre est positif.
+        '+' : Toujours afficher le signe du nombre.
+
+    %u - Entier non signé:
+        '-' : Aligner à gauche le nombre dans le champ spécifié.
+        '0' : Remplir avec des zéros si aucune précision n'est donnée.
+        '.' : Fixe la précision du nombre, écrasant le flag '0'.
+        '#' : Non applicable.
+        ' ' : Non applicable.
+        '+' : Non applicable.
+
+    %x / %X - Entier non signé en hexadécimal:
+        '-' : Aligner à gauche le nombre dans le champ spécifié.
+        '0' : Remplir avec des zéros si aucune précision n'est donnée.
+        '.' : Fixe la précision du nombre, écrasant le flag '0'.
+        '#' : Ajoute 0x ou 0X au début si le nombre n'est pas zéro.
+        ' ' : Non applicable.
+        '+' : Non applicable.
+
+    %% - Pourcentage:
+        '-' : Aligner à gauche le signe pourcentage dans le champ spécifié.
+        '0' : Remplir avec des zéros si le champ est spécifié.
+        '.' : Non applicable.
+        '#' : Non applicable.
+        ' ' : Non applicable.
+        '+' : Non applicable.
