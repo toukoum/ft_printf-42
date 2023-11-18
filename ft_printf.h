@@ -6,7 +6,7 @@
 /*   By: rgiraud <rgiraud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 16:29:10 by rgiraud           #+#    #+#             */
-/*   Updated: 2023/11/17 17:02:03 by rgiraud          ###   ########.fr       */
+/*   Updated: 2023/11/18 10:40:22 by rgiraud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,13 @@
 
 typedef struct s_format
 {
-	int		pad_count;
-	bool	pad_zero;
-	bool	pad_left;
-	bool	pad_right;
-	bool	precision;
+	int		width;
+	int		precision;
+	bool	zero;
 	bool	hashtag;
 	bool	space;
 	bool	plus;
+	bool	minus;
+	va_list	args;
 }			t_format;
 #endif

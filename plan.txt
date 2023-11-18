@@ -1,35 +1,37 @@
-    Lecture et Affichage Direct:
-        Parcourir la chaîne de format caractère par caractère.
-        Afficher directement les caractères jusqu'à rencontrer un %.
+====================================
+EXPLICATION DES FLAGS
+====================================
 
-    Détection et Traitement du Spécificateur de Format:
-        Lorsque % est rencontré, commencer l'analyse (parsing) des caractères suivants pour identifier les flags, la largeur, la précision et le type de conversion.
-        Remplir une structure avec ces informations. Par exemple, tu pourrais avoir une structure t_format qui contient des champs comme width, precision, flag_minus, flag_zero, etc.
+- `#` : Un caractère `#` spécifiant que la valeur doit être imprimée dans une « forme alternative ». 
+Pour les formats b, c, d, s et u, cette option n'a aucun effet. Pour les formats o, la précision du nombre est augmentée pour forcer le 
+premier caractère de la chaîne de sortie à être un zéro. Pour le format x (X), un résultat non nul a la chaîne `0x` (`0X`) préfixée. 
+Pour les formats a, A, e, E, f, F, g et G, le résultat contiendra toujours un point décimal, même si aucun chiffre ne suit le point 
+(normalement, un point décimal n'apparaît dans les résultats de ces formats que si un chiffre suit le point décimal). 
+Pour les formats g et G, les zéros finaux ne sont pas retirés du résultat comme ils le seraient autrement ;
 
-    Appel des Fonctions de Conversion:
-        En fonction du type de conversion détecté (s pour les chaînes, d pour les nombres décimaux, etc.), appeler la fonction appropriée.
-        Cette fonction va utiliser les informations de la structure pour formater l'argument en conséquence.
-        Par exemple, pour %s, ta fonction va devoir gérer la précision (combien de caractères de la chaîne afficher) et la largeur (combien d'espaces ajouter et où).
+- `-` : Un signe moins `-` qui spécifie l'ajustement à gauche de la sortie dans le champ indiqué ;
 
-    Mise en Forme et Conversion:
-        Chaque fonction de conversion va préparer la sortie selon les spécifications et renvoyer la chaîne de caractères formatée.
-        Si nécessaire, ajouter les espaces ou les zéros pour la largeur, tronquer la chaîne pour la précision, etc.
+- `+` : Un caractère `+` spécifiant qu'il devrait toujours y avoir un signe placé devant le nombre lors de l'utilisation des formats signés.
 
-    Affichage Final:
-        La chaîne formatée est ensuite affichée à l'endroit où le spécificateur de format a été trouvé dans la chaîne originale.
+- ` ` (espace) : Un espace spécifiant qu'un espace doit être laissé avant un nombre positif pour un format signé. Un `+` annule un espace si les deux sont utilisés ;
 
-    Répétition:
-        Continuer à lire et à afficher le reste de la chaîne après le spécificateur de format.
-        Répéter le processus pour chaque spécificateur de format rencontré jusqu'à la fin de la chaîne.
+- `0` : Un caractère zéro `0` indiquant que le remplissage par des zéros doit être utilisé plutôt que le remplissage par des espaces. Un `-` annule un `0` si 
+les deux sont utilisés ;
 
-Ton architecture de code doit donc être bien organisée pour séparer les responsabilités : une partie pour parser, une autre pour gérer la mise en forme et une dernière pour l'affichage. L'utilisation d'une structure est une très bonne approche pour garder les informations organisées et facilement accessibles à travers les différentes étapes de la conversion.
+Largeur de champ :
+- Une chaîne de chiffres optionnelle spécifiant une largeur de champ ; si la chaîne de sortie a moins de bytes que la largeur de champ,
+elle sera remplie d'espaces à gauche (ou à droite, si l'indicateur d'ajustement à gauche a été donné) pour compléter la largeur de champ 
+(notez qu'un zéro initial est un drapeau, mais un zéro intégré fait partie de la largeur de champ).
 
-Prends ton temps pour bien concevoir chaque fonction, et n'oublie pas les tests unitaires pour t'assurer que chaque partie fait bien ce qu'elle doit faire. C'est comme ça que tu vas construire un ft_printf() solide et fiable. Bon courage, et n'hésite pas si tu as d'autres questions ! 👨‍💻🛠️
+Précision :
+- Une période optionnelle, `.`, suivie par une chaîne de chiffres optionnelle donnant une précision qui spécifie le nombre de chiffres
+ à apparaître après le point décimal, pour les formats e et f, ou le nombre maximum de bytes à imprimer d'une chaîne ; si la chaîne de chiffres est absente,
+  la précision est traitée comme zéro.
 
-
-
-
+====================================
 PRIORITE
+====================================
+
 
     Flags '-' et '0':
         Si les deux sont présents, '-' a la priorité et le flag '0' est ignoré. L'alignement à gauche est donc effectué et le remplissage avec des zéros n'est pas fait.
@@ -49,8 +51,10 @@ PRIORITE
 
 
 
-
+====================================
 APPLICATION DES FLAGS
+====================================
+
 
     %c - Caractère:
         '-' : Aligner à gauche le caractère dans le champ spécifié.
@@ -107,3 +111,107 @@ APPLICATION DES FLAGS
         '#' : Non applicable.
         ' ' : Non applicable.
         '+' : Non applicable.
+    
+
+
+====================================
+PLAN ET LOGIQUE PRINCIPALE
+====================================
+
+
+Étape 1: Initialisation
+
+    Définissez une structure pour stocker les indicateurs (comme illustré dans la réponse précédente).
+    Initialisez la structure en mettant tous les indicateurs à zéro pour chaque nouvel appel à ft_printf().
+
+Étape 2: Lecture de la chaîne de format
+
+    Commencez à parcourir la chaîne de format caractère par caractère.
+    Recherchez le caractère %, qui indique le début d'un spécificateur de format.
+
+Étape 3: Identification des spécificateurs de format
+
+    Une fois % trouvé, passez au caractère suivant pour commencer l'analyse des drapeaux et des spécifications de format.
+
+Étape 4: Parsing des drapeaux
+
+    Drapeaux valides : '-0.# +*'
+    Lisez et traitez les drapeaux dans l'ordre où ils apparaissent jusqu'à ce que vous atteigniez un caractère qui n'est pas un drapeau valide.
+    Utilisez un switch ou des if imbriqués pour traiter chaque drapeau :
+        Pour '-' : Set flags.minus à 1.
+        Pour '0' : Set flags.zero à 1.
+        Pour '.' : Passez à la gestion de la précision.
+        Pour '#' : Set flags.hash à 1.
+        Pour '+' : Set flags.plus à 1.
+        Pour ' ' : Set flags.space à 1.
+        Pour '*' : Utilisez va_arg pour obtenir la largeur ou la précision de la liste d'arguments.
+
+Étape 5: Parsing de la largeur
+
+    Si le caractère après les drapeaux est un chiffre, lisez la séquence numérique pour obtenir la largeur du champ et stockez-la dans flags.width.
+
+Étape 6: Parsing de la précision
+
+    Si vous trouvez un ., cela indique la précision.
+    Lisez la séquence numérique suivant le . pour obtenir la précision et stockez-la dans flags.precision.
+
+Étape 7: Gestion des conflits de drapeaux
+
+    Vérifiez la cohérence des drapeaux et résolvez les conflits (par exemple, si à la fois '-0' sont définis, ignorez '0').
+
+Étape 8: Identification du spécificateur de conversion
+
+    Après les drapeaux, la largeur, et la précision, le prochain caractère devrait être le spécificateur de conversion (ex : c, s, p, d, i, u, x, X, %).
+    Validez le spécificateur et préparez-vous à appeler la fonction de traitement correspondante.
+
+Étape 9: Traitement des spécificateurs
+
+    Appelez la fonction appropriée pour le spécificateur de format identifié et passez-lui la structure des indicateurs et tout argument nécessaire.
+
+Étape 10: Itération
+
+    Après avoir traité un spécificateur de format, continuez à lire la chaîne de format pour le prochain spécificateur jusqu'à la fin de la chaîne.
+
+====================================
+PSEUDO CODE DE LA LOGIQUE: 
+====================================
+
+
+while (*format) {
+    // Analyse des drapeaux.
+    while (*format est un drapeau valide) {
+        // Traiter le drapeau
+        format++;
+    }
+
+    // Analyse de la largeur.
+    if (isdigit(*format) || *format == '*') {
+        // Traiter la largeur
+        format++;
+    }
+
+    // Analyse de la précision.
+    if (*format == '.') {
+        format++; // Passez le '.'
+        if (isdigit(*format) || *format == '*') {
+            // Traiter la précision
+            format++;
+        }
+    }
+
+    // Vérification du spécificateur de conversion.
+    if (*format est un spécificateur de conversion valide) {
+        // Traiter le spécificateur
+        format++;
+        break; // Sortie de la boucle après avoir traité un spécificateur de format.
+    }
+
+    if (*format == '\0') {
+        // Fin de la chaîne de format
+        break;
+    }
+}
+
+
+
+
