@@ -3,11 +3,7 @@ EXPLICATION DES FLAGS
 ====================================
 
 - `#` : Un caractère `#` spécifiant que la valeur doit être imprimée dans une « forme alternative ». 
-Pour les formats b, c, d, s et u, cette option n'a aucun effet. Pour les formats o, la précision du nombre est augmentée pour forcer le 
-premier caractère de la chaîne de sortie à être un zéro. Pour le format x (X), un résultat non nul a la chaîne `0x` (`0X`) préfixée. 
-Pour les formats a, A, e, E, f, F, g et G, le résultat contiendra toujours un point décimal, même si aucun chiffre ne suit le point 
-(normalement, un point décimal n'apparaît dans les résultats de ces formats que si un chiffre suit le point décimal). 
-Pour les formats g et G, les zéros finaux ne sont pas retirés du résultat comme ils le seraient autrement ;
+Pour les formats b, c, d, s et u, cette option n'a aucun effet. Pour le format x (X), un résultat non nul a la chaîne `0x` (`0X`) préfixée. 
 
 - `-` : Un signe moins `-` qui spécifie l'ajustement à gauche de la sortie dans le champ indiqué ;
 
@@ -75,7 +71,7 @@ APPLICATION DES FLAGS
     %p - Pointeur (adresse mémoire):
         '-' : Aligner à gauche l'adresse dans le champ spécifié.
         '0' : Non applicable, l'adresse est toujours précédée de 0x.
-        '.' : La précision peut déterminer le nombre de chiffres de l'adresse à afficher.
+        '.' : Non applicable.
         '#' : Non applicable, 0x est toujours inclus.
         ' ' : Non applicable.
         '+' : Non applicable.
@@ -121,7 +117,7 @@ PLAN ET LOGIQUE PRINCIPALE
 
 Étape 1: Initialisation
 
-    Définissez une structure pour stocker les indicateurs (comme illustré dans la réponse précédente).
+    Définissez une structure pour stocker les indicateurs.
     Initialisez la structure en mettant tous les indicateurs à zéro pour chaque nouvel appel à ft_printf().
 
 Étape 2: Lecture de la chaîne de format
@@ -135,16 +131,15 @@ PLAN ET LOGIQUE PRINCIPALE
 
 Étape 4: Parsing des drapeaux
 
-    Drapeaux valides : '-0.# +*'
+    Drapeaux valides : '-0.# +'
     Lisez et traitez les drapeaux dans l'ordre où ils apparaissent jusqu'à ce que vous atteigniez un caractère qui n'est pas un drapeau valide.
     Utilisez un switch ou des if imbriqués pour traiter chaque drapeau :
         Pour '-' : Set flags.minus à 1.
         Pour '0' : Set flags.zero à 1.
         Pour '.' : Passez à la gestion de la précision.
-        Pour '#' : Set flags.hash à 1.
+        Pour '#' : Set flags.hashtag à 1.
         Pour '+' : Set flags.plus à 1.
         Pour ' ' : Set flags.space à 1.
-        Pour '*' : Utilisez va_arg pour obtenir la largeur ou la précision de la liste d'arguments.
 
 Étape 5: Parsing de la largeur
 

@@ -6,7 +6,7 @@
 /*   By: rgiraud <rgiraud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 11:56:45 by rgiraud           #+#    #+#             */
-/*   Updated: 2023/11/18 16:08:25 by rgiraud          ###   ########.fr       */
+/*   Updated: 2023/11/20 18:29:24 by rgiraud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,17 @@ t_format	init_flags(va_list *args)
 	ft_bzero(&flags, sizeof(t_format));
 	va_copy(flags.args, *args);
 	return (flags);
+}
+void	reset_flags(t_format *flags)
+{
+	flags->hashtag = 0;
+	flags->space = 0;
+	flags->minus = 0;
+	flags->plus = 0;
+	flags->point = 0;
+	flags->width = 0;
+	flags->precision = 0;
+	flags->zero = 0;
 }
 
 void	ft_print_space(int *count, t_format *flags)
@@ -49,11 +60,16 @@ void	ft_putchar_count(char c, int *count)
 	write(1, &c, 1);
 	(*count)++;
 }
-
-void	ft_print_null(int *count)
+// a re checker
+void	ft_print_null(int *count, t_format *flags)
 {
-	write(1, "(null)", 6);
-	(*count) += 6;
+	if ((flags->point && flags->precision < 6) && flags->width < 6)
+		return ;
+	while (flags->width > 6 && !flags->minus)
+		ft_print_space(count, flags);
+	(*count) += write(1, "(null)", 6);
+	while (flags->width > 6 && flags->minus)
+		ft_print_space(count, flags);
 }
 
 void	ft_display(t_format args)
@@ -110,6 +126,7 @@ void	parse_precision(char *format, int *index_format, t_format *flags)
 {
 	if (format[*index_format] == '.')
 	{
+		flags->point = 1;
 		(*index_format)++;
 		while (format[*index_format] && ft_isdigit(format[*index_format]))
 		{
@@ -149,18 +166,16 @@ void	convert_s(t_format *flags, int *count)
 
 	result = va_arg(flags->args, char *);
 	if (!result)
-		return (ft_print_null(count));
-	if (flags->precision && flags->precision < (int)ft_strlen(result))
-		result = ft_substr(result, 0, flags->precision);
-	len_result = ft_strlen(result);
+		return (ft_print_null(count, flags));
+	if (flags->point && flags->precision < (int)ft_strlen(result))
+		len_result = flags->precision;
+	else
+		len_result = (int)ft_strlen(result);
 	while (flags->width && flags->width > len_result && !flags->minus)
 		ft_print_space(count, flags);
-	ft_putstr_fd(result, 1);
-	(*count) += len_result;
+	(*count) += write(1, result, len_result);
 	while (flags->width && flags->width > len_result && flags->minus)
 		ft_print_space(count, flags);
-	if (flags->precision && flags->precision < (int)ft_strlen(result))
-		free(result);
 }
 
 char	*ft_add_plus(char *s)
@@ -176,36 +191,120 @@ char	*ft_add_plus(char *s)
 	free(s);
 	return (result);
 }
+
+void	zero_clc(t_format *flags, int *count)
+{
+	while (flags->width)
+	{
+		ft_print_space(count, flags);
+	}
+}
+void	convert_id_minus(t_format *flags, int *count, char *result)
+{
+	int	len_result;
+	int	total;
+
+	len_result = ft_strlen(result);
+	if (flags->point && !flags->precision && len_result == 1 && result[0] == 48)
+		return (zero_clc(flags, count));
+	total = (*count);
+	if (result[0] == '-')
+	{
+		ft_putchar_count('-', count);
+		result += 1;
+		len_result--;
+	}
+	else if (flags->plus)
+		ft_putchar_count('+', count);
+	else if (flags->space)
+		ft_putchar_count(' ', count);
+	while (flags->precision > len_result)
+		ft_print_zero_precision(count, flags);
+	(*count) += write(1, result, len_result);
+	total = (*count) - total;
+	while (flags->width > total)
+		ft_print_space(count, flags);
+}
+
+void	convert_id_zero(t_format *flags, int *count, char *result)
+{
+	int	len_result;
+	int	total;
+
+	len_result = ft_strlen(result);
+	if (flags->point && !flags->precision && len_result == 1 && result[0] == 48)
+		return (zero_clc(flags, count));
+	total = len_result;
+	if ((flags->plus || flags->space) && result[0] != '-')
+		total++;
+	if (result[0] == '-')
+	{
+		ft_putchar_count('-', count);
+		result += 1;
+		len_result--;
+	}
+	else if (flags->plus)
+		ft_putchar_count('+', count);
+	else if (flags->space)
+		ft_putchar_count(' ', count);
+	while (flags->width > total)
+		ft_print_zero(count, flags);
+	(*count) += write(1, result, len_result);
+}
+void	convert_id_normal(t_format *flags, int *count, char *result)
+{
+	int	len_result;
+	int	total;
+
+	len_result = ft_strlen(result);
+	if (flags->point && !flags->precision && len_result == 1 && result[0] == 48)
+		return (zero_clc(flags, count));
+	total = len_result; // 3
+	if (result[0] == '-')
+		len_result--;
+	if ((flags->plus || flags->space) && result[0] != '-')
+		total++;
+	if ((flags->precision - len_result) > 0)
+		total += flags->precision - len_result;
+	while (flags->width > total)
+		ft_print_space(count, flags);
+	if (result[0] == '-')
+	{
+		ft_putchar_count('-', count);
+		result += 1;
+	}
+	else if (flags->plus)
+		ft_putchar_count('+', count);
+	else if (flags->space)
+		ft_putchar_count(' ', count);
+	while (flags->precision > len_result)
+		ft_print_zero_precision(count, flags);
+	(*count) += write(1, result, len_result);
+}
+
 void	convert_id(t_format *flags, int *count)
 {
 	char	*result;
-	int		len_result;
-	int		precision;
 
-	precision = flags->precision;
 	result = ft_itoa(va_arg(flags->args, int));
-	len_result = ft_strlen(result);
-	// if (result[0] != '-')
-	// 	if (flags->plus || flags->space)
-	// 		len_result++;
-	while (flags->width > (len_result + (flags->precision - len_result)) && !flags->minus)
-		ft_print_space(count, flags);
-	if (result[0] != '-')
-	{
-		if (flags->plus)
-			ft_putchar_count('+', count);
-		else if (flags->space)
-			ft_putchar_count(' ', count);
-	}
-	while (flags->precision > len_result)
-		ft_print_zero_precision(count, flags);
-	ft_putstr_fd(result, 1);
-	(*count) += len_result;
-	while (flags->width > (len_result + (precision - len_result)) && flags->minus)
-		ft_print_space(count, flags);
+	if (!result)
+		return ;
+	if (flags->minus)
+		convert_id_minus(flags, count, result);
+	else if (!flags->precision && flags->zero)
+		convert_id_zero(flags, count, result);
+	else
+		convert_id_normal(flags, count, result);
 	free(result);
 }
 
+void	convert_p(t_format *flags, int *count)
+{
+	char *result;
+	result = ft_convert_base(ft_itoa_boost(va_arg(flags->args,
+					unsigned long long)), "0123456789", "0123456789abcdef");
+	printf("result test: %s", result);
+}
 void	ft_convert(t_format *flags, char *format, int *count, int *index_format)
 {
 	char	*conversion_letter;
@@ -221,8 +320,8 @@ void	ft_convert(t_format *flags, char *format, int *count, int *index_format)
 		convert_s(flags, count);
 	else if (*i_conv == 'd' || *i_conv == 'i')
 		convert_id(flags, count);
-	// else if (*i_conv == 'p')
-	//     convert_p(flags, count, index_format);
+	else if (*i_conv == 'p')
+		convert_p(flags, count);
 	// else if (*i_conv == 'u')
 	//     convert_u(flags, count, index_format);
 	// else if (*i_conv == 'x')
@@ -250,13 +349,15 @@ void	ft_construct_param(t_format *flags, char *format, int *count,
 // parcours de la chaine format, initialisation des parametre variadique,
 // constructions des parametre apres %
 // tient le compte des charactere affiche avec la variable count;
-int	ft_printf(char *format, ...)
+int	ft_printf(const char *format, ...)
 {
 	int			index_format;
 	int			count;
 	va_list		args;
 	t_format	flags;
+	char		*format2;
 
+	format2 = (char *)format;
 	va_start(args, format);
 	flags = init_flags(&args);
 	index_format = 0;
@@ -264,20 +365,25 @@ int	ft_printf(char *format, ...)
 	while (format[index_format])
 	{
 		if (format[index_format] == '%' && format[index_format + 1])
-			ft_construct_param(&flags, format, &count, &index_format);
+			ft_construct_param(&flags, format2, &count, &index_format);
 		else
-			ft_putchar_max(format, &count, &index_format);
+			ft_putchar_max(format2, &count, &index_format);
+		reset_flags(&flags);
 	}
 	va_end(args);
 	return (count);
 }
 
-// int	main(void)
-// {
-// 	int	count;
+int	main(void)
+{
+	int	count;
+	int	n;
 
-// 	count = ft_printf("% 010.5d", 42);
-// 	printf("\n% 010.5d", 42);
-// 	printf("\n\nCOUNT DE LA FONCTION FT_PRINTF=> %d", count);
-// 	return (0);
-// }
+	count = ft_printf("%p", &n);
+	printf("\n%p", &n); 
+	// printf("\n %-s ", "-");
+	// count = ft_printf("%010i", __LONG_MAX__);
+	// count = printf("\n%010i", __LONG_MAX__);
+	printf("\nCOUNT DE LA FONCTION FT_PRINTF=> %d", count);
+	return (0);
+}

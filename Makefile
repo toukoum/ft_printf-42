@@ -1,6 +1,6 @@
 NAME = libftprintf.a
 
-SRC = ft_printf.c
+SRC = ft_printf.c ft_convert_base.c ft_convert_base2.c ft_itoa_boost.c
 OBJ = $(SRC:.c=.o)
 
 DEPS = ft_printf.h
@@ -34,6 +34,8 @@ $(NAME): $(OBJ)
 %.o: %.c $(DEPS)
 	@echo "$(GREEN)Compiling $<...$(NC)"
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+bonus:all
 
 clean:
 	@echo "$(RED)Cleaning object files...$(NC)"
