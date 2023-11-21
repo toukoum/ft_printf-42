@@ -6,12 +6,12 @@
 /*   By: rgiraud <rgiraud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/20 17:33:52 by rgiraud           #+#    #+#             */
-/*   Updated: 2023/11/20 17:55:38 by rgiraud          ###   ########.fr       */
+/*   Updated: 2023/11/21 11:19:12 by rgiraud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-#include "ft_printf.h"
+#include "../includes/ft_printf.h"
+#include "../libft/libft.h"
 
 size_t	ft_nlen2(unsigned long long n)
 {
@@ -49,7 +49,7 @@ char	*ft_itoa_boost(unsigned long long n)
 	char	*result;
 	size_t	len;
 	int		i;
-    
+
 	if (n == 0)
 		return (ft_strdup("0"));
 	i = 0;

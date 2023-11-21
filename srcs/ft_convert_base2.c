@@ -6,11 +6,11 @@
 /*   By: rgiraud <rgiraud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/20 17:31:10 by rgiraud           #+#    #+#             */
-/*   Updated: 2023/11/20 18:28:41 by rgiraud          ###   ########.fr       */
+/*   Updated: 2023/11/21 11:18:55 by rgiraud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "../includes/ft_printf.h"
 
 unsigned long long	ft_strlen2(char *str)
 {
@@ -24,7 +24,7 @@ unsigned long long	ft_strlen2(char *str)
 	return (i);
 }
 
-unsigned long long	ft_sign(char *str, int *i)
+unsigned long long	ft_sign(char *str, unsigned long long *i)
 {
 	unsigned long long	sign;
 
@@ -40,11 +40,12 @@ unsigned long long	ft_sign(char *str, int *i)
 	return (sign);
 }
 
-unsigned long long	convert_string_to_int(char *str, char *base, int len, int i)
+unsigned long long	convert_string_to_int(char *str, char *base,
+		unsigned long long len, unsigned long long i)
 {
 	unsigned long long	nbr;
 	unsigned long long	j;
-	unsigned long long	value;
+	long long			value;
 
 	nbr = 0;
 	while (str[i])
@@ -69,10 +70,10 @@ unsigned long long	convert_string_to_int(char *str, char *base, int len, int i)
 
 unsigned long long	ft_atoi_base(char *str, char *base)
 {
-	unsigned long long nbr;
-	unsigned long long len;
-	unsigned long long sign;
-	unsigned long long i;
+	unsigned long long	nbr;
+	unsigned long long	len;
+	unsigned long long	sign;
+	unsigned long long	i;
 
 	i = 0;
 	nbr = 0;

@@ -6,11 +6,12 @@
 /*   By: rgiraud <rgiraud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/20 17:30:38 by rgiraud           #+#    #+#             */
-/*   Updated: 2023/11/20 18:24:20 by rgiraud          ###   ########.fr       */
+/*   Updated: 2023/11/21 16:31:11 by rgiraud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "../includes/ft_printf.h"
+#include "../libft/libft.h"
 
 void	ft_reverse_str(char *result)
 {
@@ -60,63 +61,58 @@ int	ft_check_base(char *base)
 	return (1);
 }
 
-int	ft_len_result(int nbr, char *base)
+int	ft_len_result(unsigned long long nbr, unsigned long long base_len)
 {
 	int	len_result;
-	int	len_base;
 
-	len_base = 0;
-	while (base[len_base])
-		len_base++;
+	if (nbr == 0)
+		return (1);
 	len_result = 0;
 	while (nbr)
 	{
-		nbr = nbr / len_base;
+		nbr /= base_len;
 		len_result++;
 	}
 	return (len_result);
 }
 
-char	*ft_putnbr_base(unsigned long long nbr, char *base)
+char	*ft_putnbr_base(unsigned long long n, char *base)
 {
 	char				*result;
 	int					i;
-	unsigned long long	n;
+	unsigned long long	base_len;
+	int					len_result;
 
-	n = nbr;
-	i = 0;
-	result = malloc(ft_len_result(nbr, base) * sizeof(char));
+	base_len = ft_strlen(base);
+	if (n == 0)
+		len_result = 1;
+	else
+		len_result = ft_len_result(n, base_len);
+	result = malloc((len_result + 1) * sizeof(char));
 	if (!result)
 		return (NULL);
-	if (n < 0)
-	{
-		result[0] = '-';
-		i++;
-		n *= -1;
-	}
+	i = 0;
 	if (n == 0)
 		result[i++] = base[0];
 	while (n)
 	{
-		result[i++] = base[n % ft_strlen(base)];
-		n /= ft_strlen(base);
+		result[i++] = base[n % base_len];
+		n /= base_len;
 	}
-	i -= 1;
+	result[i] = '\0';
 	ft_reverse_str(result);
 	return (result);
 }
 
 char	*ft_convert_base(char *nbr, char *base_from, char *base_to)
 {
-	unsigned long long number;
-	char *result;
+	unsigned long long	number;
+	char				*result;
 
 	if ((!ft_check_base(base_from) || !ft_check_base(base_to)))
 		return (NULL);
-    printf("\n\nnumber AVANT atoi base: %s\n", nbr);
-
 	number = ft_atoi_base(nbr, base_from);
-    printf("\n\nnumber apres atoi base: %llu\n", number);
 	result = ft_putnbr_base(number, base_to);
+	free(nbr);
 	return (result);
 }

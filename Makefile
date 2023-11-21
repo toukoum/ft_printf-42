@@ -1,51 +1,44 @@
 NAME = libftprintf.a
 
-SRC = ft_printf.c ft_convert_base.c ft_convert_base2.c ft_itoa_boost.c
-OBJ = $(SRC:.c=.o)
+LIBFT_DIR = ./libft
+LIBFT = $(LIBFT_DIR)/libft.a
 
-DEPS = ft_printf.h
+SRC_DIR = ./srcs
+SRCS = $(wildcard $(SRC_DIR)/ft*.c)
 
-LIBFT = libft/libft.a
-LIBFT_DIR = libft
-LIBFT_BASE = libft.a
+OBJ_DIR = ./objs
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-INCLUDES = -I libft/
+INCLUDES = -I./includes -I$(LIBFT_DIR)
 
 CC = cc
-CFLAGS = -Wall -Werror -Wextra
-
-RED=\033[0;31m
-ROSE=\033[0;95m
-GREEN=\033[0;32m
-NC=\033[0m
+CFLAGS = -Wall -Wextra -Werror
 
 all: $(NAME)
 
-$(NAME): $(OBJ)
-	@echo "$(ROSE)Compiling libft...$(NC)"
-	make -C $(LIBFT_DIR)
-	@echo "$(ROSE)Creating library $(NAME)...$(NC)"
-	cp $(LIBFT) .
-	ar -x $(LIBFT_BASE)
-	ar rcs $(NAME) $(OBJ) *.o
-	@echo "$(GREEN)Library $(NAME) created$(NC)"
-	rm -f $(LIBFT_BASE) *.o
-
-%.o: %.c $(DEPS)
-	@echo "$(GREEN)Compiling $<...$(NC)"
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
-
 bonus:all
 
+$(NAME): $(OBJS)
+	make -C $(LIBFT_DIR)
+	cp $(LIBFT) $(NAME)
+	ar rcs $(NAME) $(OBJS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
 clean:
-	@echo "$(RED)Cleaning object files...$(NC)"
-	rm -f $(OBJ)
+	make clean -C $(LIBFT_DIR)
+	rm -f $(OBJS)
 
 fclean: clean
-	@echo "$(RED)Cleaning library $(NAME)...$(NC)"
+	make fclean -C $(LIBFT_DIR)
 	rm -f $(NAME)
-	make -C $(LIBFT_DIR) fclean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+test: all
+	@cc -Wall -Wextra -Werror -Iincludes -g -ILibft main.c -L. libftprintf.a
+	@./a.out
+
+
+.PHONY: all clean fclean re test

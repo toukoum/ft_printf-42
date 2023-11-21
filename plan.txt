@@ -210,3 +210,27 @@ while (*format) {
 
 
 
+
+ft_printf/
+│
+├── libft/                # Votre bibliothèque de fonctions utiles déjà existante
+│   ├── ft_memset.c
+│   ├── ft_bzero.c
+│   ├── ft_memcpy.c
+│   ├── ...
+│   └── libft.h
+│
+├── includes/             # Dossier pour tous les en-têtes
+│   ├── ft_printf.h       # En-tête principal pour ft_printf
+│   └── libft.h           # En-tête pour libft si pas déjà dans libft/
+│
+├── srcs/                 # Dossier pour les sources de ft_printf
+│   ├── ft_printf.c       # Fonction principale de ft_printf
+│   ├── parse.c           # Fonctions de parsing des formats
+│   ├── print_char.c      # Fonction pour imprimer %c
+│   ├── print_string.c    # Fonction pour imprimer %s
+│   ├── print_number.c    # Fonctions pour imprimer %d et %i
+│   ├── print_utils.c     # Fonctions auxiliaires pour le formatage
+│   └── ...
+│
+└── Makefile              # Votre Makefile pour compiler le projet
